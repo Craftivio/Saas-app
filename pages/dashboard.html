@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Craftivio AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Craftivio<span class="logo-dot">.</span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="active">
+        <span class="nav-icon">⚡</span> Dashboard
+      </a>
+      <a href="tool.html?t=hook">
+        <span class="nav-icon">🎯</span> Hook Generator
+      </a>
+      <a href="tool.html?t=caption">
+        <span class="nav-icon">✍️</span> Caption Generator
+      </a>
+      <a href="tool.html?t=hashtag">
+        <span class="nav-icon">#</span> Hashtag Generator
+      </a>
+      <a href="pricing.html" style="margin-top: 8px;">
+        <span class="nav-icon">⭐</span> Upgrade to Pro
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarName">Loading...</span>
+          <span class="user-plan" id="sidebarPlan">Free Plan</span>
+        </div>
+      </div>
+      <button onclick="CraftivioAI.logout()" class="btn-ghost btn-full" style="margin-top:12px; font-size:0.82rem; padding:8px 16px;">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="usage-badge" id="usageBadge">
+          <span id="usageText">5/5 left</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-content">
+      <div class="dash-greeting">
+        <h1>Good to see you, <span id="greetName">Creator</span> 👋</h1>
+        <p>What are we creating today?</p>
+      </div>
+
+      <p class="section-heading">Your Tools</p>
+      <div class="tools-grid">
+        <a href="tool.html?t=hook" class="tool-card">
+          <div class="tool-card-icon icon-hook">🎯</div>
+          <h3>Hook Generator</h3>
+          <p>Craft scroll-stopping opening lines that demand attention in the first 2 seconds.</p>
+          <div class="tool-card-arrow">
+            <span class="tool-tag tag-green">Most Popular</span>
+            <span style="color:var(--accent)">→</span>
+          </div>
+        </a>
+        <a href="tool.html?t=caption" class="tool-card">
+          <div class="tool-card-icon icon-caption">✍️</div>
+          <h3>Caption Generator</h3>
+          <p>Turn any topic into an engaging, story-driven caption with a built-in call to action.</p>
+          <div class="tool-card-arrow">
+            <span class="tool-tag tag-blue">Editor's Pick</span>
+            <span style="color:var(--accent)">→</span>
+          </div>
+        </a>
+        <a href="tool.html?t=hashtag" class="tool-card">
+          <div class="tool-card-icon icon-hashtag">#</div>
+          <h3>Hashtag Generator</h3>
+          <p>Get precision-curated hashtags mixing niche, trending, and broad tags for max reach.</p>
+          <div class="tool-card-arrow">
+            <span class="tool-tag tag-purple">Fast &amp; Smart</span>
+            <span style="color:var(--accent)">→</span>
+          </div>
+        </a>
+      </div>
+
+      <p class="section-heading">Today's Usage</p>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-num" id="statUsed">0</div>
+          <div class="dash-stat-label">Generations today</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num" id="statRemaining">5</div>
+          <div class="dash-stat-label">Remaining today</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-num" id="statPlan">Free</div>
+          <div class="dash-stat-label">Current plan</div>
+        </div>
+      </div>
+
+      <div class="usage-bar" style="margin-top:24px;" id="usageBarSection">
+        <div class="usage-bar-info">
+          <div class="usage-bar-title" id="usageBarTitle">Daily Generations Used</div>
+          <div class="usage-bar-track">
+            <div class="usage-bar-fill" id="usageBarFill" style="width: 0%"></div>
+          </div>
+        </div>
+        <a href="pricing.html" class="btn-primary" style="white-space:nowrap; font-size:0.85rem; padding:10px 18px;" id="upgradeCta">
+          Upgrade → Pro
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // Auth guard
+    const user = CraftivioAI.getCurrentUser();
+    if (!user) window.location.href = 'login.html';
+
+    // Populate user info
+    document.getElementById('sidebarAvatar').textContent = user.initials || user.name[0].toUpperCase();
+    document.getElementById('sidebarName').textContent = user.name;
+    document.getElementById('sidebarPlan').textContent = user.plan === 'pro' ? 'Pro Plan ⭐' : 'Free Plan';
+    document.getElementById('greetName').textContent = user.name.split(' ')[0];
+
+    // Usage stats
+    const usage = CraftivioAI.getRemainingGenerations();
+    const used = 5 - Math.min(usage, 5);
+    const remaining = user.plan === 'pro' ? '∞' : usage;
+
+    document.getElementById('statUsed').textContent = user.plan === 'pro' ? '∞' : used;
+    document.getElementById('statRemaining').textContent = remaining;
+    document.getElementById('statPlan').textContent = user.plan === 'pro' ? 'Pro ⭐' : 'Free';
+    document.getElementById('usageText').textContent = user.plan === 'pro' ? '∞ left' : `${usage}/5 left`;
+
+    // Usage bar
+    if (user.plan === 'pro') {
+      document.getElementById('usageBarFill').style.width = '100%';
+      document.getElementById('usageBarFill').style.background = 'linear-gradient(90deg, #10b981, #34d399)';
+      document.getElementById('usageBarTitle').textContent = 'Unlimited Pro Access';
+      document.getElementById('upgradeCta').textContent = '✓ Pro Active';
+      document.getElementById('upgradeCta').style.background = 'rgba(16,185,129,0.15)';
+      document.getElementById('upgradeCta').style.color = '#10b981';
+      document.getElementById('upgradeCta').style.boxShadow = 'none';
+    } else {
+      document.getElementById('usageBarFill').style.width = `${(used / 5) * 100}%`;
+    }
+  </script>
+</body>
+</html>
