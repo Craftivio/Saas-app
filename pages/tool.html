@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tool – Craftivio AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Craftivio<span class="logo-dot">.</span></div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <a href="dashboard.html">
+        <span class="nav-icon">⚡</span> Dashboard
+      </a>
+      <a href="tool.html?t=hook" id="nav-hook">
+        <span class="nav-icon">🎯</span> Hook Generator
+      </a>
+      <a href="tool.html?t=caption" id="nav-caption">
+        <span class="nav-icon">✍️</span> Caption Generator
+      </a>
+      <a href="tool.html?t=hashtag" id="nav-hashtag">
+        <span class="nav-icon">#</span> Hashtag Generator
+      </a>
+      <a href="pricing.html" style="margin-top:8px;">
+        <span class="nav-icon">⭐</span> Upgrade to Pro
+      </a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarName">Loading...</span>
+          <span class="user-plan" id="sidebarPlan">Free Plan</span>
+        </div>
+      </div>
+      <button onclick="CraftivioAI.logout()" class="btn-ghost btn-full" style="margin-top:12px; font-size:0.82rem; padding:8px 16px;">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="topbar-title" id="topbarTitle">Tool</span>
+      </div>
+      <div class="topbar-right">
+        <div class="usage-badge">
+          <span id="usageText">5/5 left</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-content">
+      <div class="tool-header">
+        <h1 id="toolTitle">Generator</h1>
+        <p id="toolDesc">Loading tool...</p>
+      </div>
+
+      <!-- Usage warning -->
+      <div class="usage-bar" id="usageWarning" style="display:none; background: rgba(239,68,68,0.06); border-color: rgba(239,68,68,0.3);">
+        <div class="usage-bar-info">
+          <div class="usage-bar-title" style="color:#f87171">Daily limit reached</div>
+          <div style="font-size:0.82rem; color:var(--text-muted); margin-top:4px;">Upgrade to Pro for unlimited generations.</div>
+        </div>
+        <a href="pricing.html" class="btn-primary" style="font-size:0.85rem; padding:10px 18px; white-space:nowrap;">Upgrade → Pro</a>
+      </div>
+
+      <!-- FORM -->
+      <div class="tool-form" id="toolForm">
+        <label class="tool-label" id="inputLabel">Describe your topic or niche</label>
+        <textarea
+          class="tool-textarea"
+          id="topicInput"
+          placeholder="e.g. 'Productivity tips for remote workers who struggle with focus'"
+          rows="4"
+        ></textarea>
+
+        <div class="tool-options">
+          <select class="tool-select" id="toneSelect">
+            <option value="professional">Professional</option>
+            <option value="casual" selected>Casual & Relatable</option>
+            <option value="bold">Bold & Direct</option>
+            <option value="humorous">Humorous</option>
+            <option value="inspirational">Inspirational</option>
+          </select>
+          <select class="tool-select" id="platformSelect">
+            <option value="Instagram">Instagram</option>
+            <option value="TikTok">TikTok</option>
+            <option value="LinkedIn" selected>LinkedIn</option>
+            <option value="Twitter/X">Twitter / X</option>
+            <option value="YouTube">YouTube</option>
+          </select>
+        </div>
+
+        <button class="generate-btn" id="generateBtn">
+          <span class="btn-text">✨ Generate</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="result-section" id="resultSection">
+        <div class="result-header">
+          <span class="result-label">Generated Results</span>
+          <button class="copy-btn" id="copyAllBtn" onclick="copyAll()">📋 Copy All</button>
+        </div>
+        <div class="result-variants" id="resultVariants"></div>
+        <button class="generate-btn" id="regenerateBtn" style="margin-top:20px; background: rgba(99,102,241,0.15); color:var(--accent); box-shadow:none;">
+          <span class="btn-text">↺ Regenerate</span>
+          <div class="spinner"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    // Auth guard
+    const user = CraftivioAI.getCurrentUser();
+    if (!user) window.location.href = 'login.html';
+
+    // Tool config
+    const toolConfig = {
+      hook: {
+        title: '🎯 Hook Generator',
+        desc: 'Generate irresistible opening lines that stop the scroll instantly.',
+        label: 'What is your content about?',
+        placeholder: "e.g. 'How I grew my Instagram from 0 to 50K in 6 months without ads'"
+      },
+      caption: {
+        title: '✍️ Caption Generator',
+        desc: 'Create engaging, story-driven captions with built-in calls to action.',
+        label: 'What is your post about?',
+        placeholder: "e.g. 'Launching my new online course on personal finance for millennials'"
+      },
+      hashtag: {
+        title: '# Hashtag Generator',
+        desc: 'Get a precision-curated mix of niche, trending, and broad hashtags.',
+        label: 'What is your post niche or topic?',
+        placeholder: "e.g. 'Sustainable fashion and eco-friendly lifestyle content'"
+      }
+    };
+
+    // Get tool from URL
+    const params = new URLSearchParams(window.location.search);
+    const tool = params.get('t') || 'hook';
+    const config = toolConfig[tool] || toolConfig.hook;
+
+    // Set active nav
+    document.getElementById(`nav-${tool}`)?.classList.add('active');
+
+    // Set UI
+    document.getElementById('topbarTitle').textContent = config.title;
+    document.getElementById('toolTitle').textContent = config.title;
+    document.getElementById('toolDesc').textContent = config.desc;
+    document.getElementById('inputLabel').textContent = config.label;
+    document.getElementById('topicInput').placeholder = config.placeholder;
+    document.title = `${config.title} – Craftivio AI`;
+
+    // User info
+    document.getElementById('sidebarAvatar').textContent = user.initials || user.name[0].toUpperCase();
+    document.getElementById('sidebarName').textContent = user.name;
+    document.getElementById('sidebarPlan').textContent = user.plan === 'pro' ? 'Pro Plan ⭐' : 'Free Plan';
+
+    const remaining = CraftivioAI.getRemainingGenerations();
+    document.getElementById('usageText').textContent = user.plan === 'pro' ? '∞ left' : `${remaining}/5 left`;
+
+    // Check usage
+    if (!CraftivioAI.canGenerate()) {
+      document.getElementById('usageWarning').style.display = 'flex';
+      document.getElementById('generateBtn').disabled = true;
+    }
+
+    // Store last results for copy all
+    let lastResults = [];
+
+    async function generate(btn) {
+      const topic = document.getElementById('topicInput').value.trim();
+      if (!topic) {
+        CraftivioAI.showToast('Please enter a topic to generate content.');
+        document.getElementById('topicInput').focus();
+        return;
+      }
+      if (!CraftivioAI.canGenerate()) {
+        document.getElementById('usageWarning').style.display = 'flex';
+        return;
+      }
+
+      const tone = document.getElementById('toneSelect').value;
+      const platform = document.getElementById('platformSelect').value;
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+
+      try {
+        const results = await CraftivioAI.generateContent(tool, topic, tone, platform);
+        lastResults = results;
+        CraftivioAI.incrementUsage();
+
+        // Update usage display
+        const newRemaining = CraftivioAI.getRemainingGenerations();
+        document.getElementById('usageText').textContent = user.plan === 'pro' ? '∞ left' : `${newRemaining}/5 left`;
+
+        // Render results
+        const container = document.getElementById('resultVariants');
+        container.innerHTML = '';
+        results.forEach((text, i) => {
+          const card = document.createElement('div');
+          card.className = 'variant-card';
+          card.innerHTML = `
+            <div class="variant-num">Variant ${i + 1}</div>
+            <div class="variant-text">${text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+            <button class="variant-copy" onclick="CraftivioAI.copyToClipboard(${JSON.stringify(text)}, this)">Copy</button>
+          `;
+          container.appendChild(card);
+        });
+
+        document.getElementById('resultSection').classList.add('show');
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        if (!CraftivioAI.canGenerate()) {
+          document.getElementById('usageWarning').style.display = 'flex';
+          document.getElementById('generateBtn').disabled = true;
+          document.getElementById('regenerateBtn').disabled = true;
+        }
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = !CraftivioAI.canGenerate();
+      }
+    }
+
+    function copyAll() {
+      if (!lastResults.length) return;
+      const text = lastResults.map((r, i) => `Variant ${i + 1}:\n${r}`).join('\n\n---\n\n');
+      CraftivioAI.copyToClipboard(text, document.getElementById('copyAllBtn'));
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', function() {
+      generate(this);
+    });
+    document.getElementById('regenerateBtn').addEventListener('click', function() {
+      generate(this);
+    });
+  </script>
+</body>
+</html>
