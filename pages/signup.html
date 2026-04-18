@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up – Craftivio AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+  <div class="auth-card">
+    <a href="../index.html" class="auth-back">← Back to home</a>
+    <div class="auth-logo">Craftivio<span class="logo-dot">.</span></div>
+    <p class="auth-tagline">Create your free account. No credit card needed.</p>
+
+    <div class="auth-error" id="authError"></div>
+
+    <div class="form-group">
+      <label for="name">Full name</label>
+      <input type="text" id="name" placeholder="Alex Johnson" autocomplete="name"/>
+    </div>
+    <div class="form-group">
+      <label for="email">Email address</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Min. 6 characters" autocomplete="new-password"/>
+    </div>
+    <button class="btn-primary auth-submit" id="signupBtn">Create Free Account</button>
+
+    <p class="auth-footer">
+      Already have an account? <a href="login.html">Log in</a>
+    </p>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    if (CraftivioAI.getCurrentUser()) {
+      window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('signupBtn').addEventListener('click', () => {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('authError');
+
+      errorEl.classList.remove('show');
+
+      if (!name || !email || !password) {
+        errorEl.textContent = 'Please fill in all fields.';
+        errorEl.classList.add('show');
+        return;
+      }
+      if (password.length < 6) {
+        errorEl.textContent = 'Password must be at least 6 characters.';
+        errorEl.classList.add('show');
+        return;
+      }
+      if (!email.includes('@')) {
+        errorEl.textContent = 'Please enter a valid email address.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      const users = CraftivioAI.getUsers();
+      if (users[email]) {
+        errorEl.textContent = 'An account with this email already exists.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      const user = {
+        name,
+        email,
+        password,
+        plan: 'free',
+        joinedAt: new Date().toISOString(),
+        initials: name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
+      };
+
+      users[email] = user;
+      CraftivioAI.saveUsers(users);
+      CraftivioAI.setCurrentUser(user);
+      window.location.href = 'dashboard.html';
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('signupBtn').click();
+    });
+  </script>
+</body>
+</html>
