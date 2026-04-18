@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pricing – Craftivio AI</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">Craftivio<span class="logo-dot">.</span></div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-icon">⚡</span> Dashboard</a>
+      <a href="tool.html?t=hook"><span class="nav-icon">🎯</span> Hook Generator</a>
+      <a href="tool.html?t=caption"><span class="nav-icon">✍️</span> Caption Generator</a>
+      <a href="tool.html?t=hashtag"><span class="nav-icon">#</span> Hashtag Generator</a>
+      <a href="pricing.html" class="active" style="margin-top:8px;"><span class="nav-icon">⭐</span> Upgrade to Pro</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="sidebarAvatar">?</div>
+        <div class="user-info">
+          <span class="user-name" id="sidebarName">Loading...</span>
+          <span class="user-plan" id="sidebarPlan">Free Plan</span>
+        </div>
+      </div>
+      <button onclick="CraftivioAI.logout()" class="btn-ghost btn-full" style="margin-top:12px; font-size:0.82rem; padding:8px 16px;">
+        Sign Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+        <span class="topbar-title">Upgrade to Pro</span>
+      </div>
+    </div>
+
+    <div class="dash-content" style="max-width:800px;">
+      <div class="dash-greeting">
+        <h1>Unlock <span class="gradient-text">Unlimited</span> Power</h1>
+        <p>Go Pro and never worry about generation limits again.</p>
+      </div>
+
+      <div class="pricing-grid" style="margin-top:0;">
+        <div class="pricing-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">$0<span>/mo</span></div>
+          <div class="plan-desc">For curious creators</div>
+          <ul class="plan-features">
+            <li>✓ 5 generations per day</li>
+            <li>✓ All 3 tools</li>
+            <li>✓ Copy to clipboard</li>
+            <li class="dim">✗ Unlimited generations</li>
+            <li class="dim">✗ Priority AI speed</li>
+            <li class="dim">✗ Advanced tone control</li>
+            <li class="dim">✗ Early access to new tools</li>
+          </ul>
+          <button class="btn-ghost btn-full" id="freeBtn" onclick="stayFree()">Current Plan</button>
+        </div>
+
+        <div class="pricing-card pricing-card--pro">
+          <div class="plan-badge">Recommended</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">$12<span>/mo</span></div>
+          <div class="plan-desc">For serious content creators</div>
+          <ul class="plan-features">
+            <li>✓ <strong>Unlimited</strong> generations</li>
+            <li>✓ All 3 tools</li>
+            <li>✓ Copy to clipboard</li>
+            <li>✓ Priority AI speed</li>
+            <li>✓ Advanced tone control</li>
+            <li>✓ Early access to new tools</li>
+          </ul>
+          <button class="btn-primary btn-full" id="proBtn" onclick="upgradeToPro()">Upgrade to Pro →</button>
+        </div>
+      </div>
+
+      <p style="text-align:center; color:var(--text-dim); font-size:0.82rem; margin-top:24px;">
+        🔒 Secure checkout · Cancel anytime · Instant activation
+      </p>
+
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-top:32px;">
+        <div class="section-heading">Frequently Asked Questions</div>
+        <div class="faq-item" style="border-bottom:1px solid var(--border); padding:16px 0;">
+          <div style="font-weight:600; margin-bottom:6px;">Can I cancel anytime?</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">Yes. Cancel whenever you want — no questions asked. You'll keep Pro access until the end of your billing period.</div>
+        </div>
+        <div class="faq-item" style="border-bottom:1px solid var(--border); padding:16px 0;">
+          <div style="font-weight:600; margin-bottom:6px;">What counts as a "generation"?</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">Each time you click Generate, that's one generation. One click produces 3 variants, counted as 1 generation.</div>
+        </div>
+        <div class="faq-item" style="padding:16px 0;">
+          <div style="font-weight:600; margin-bottom:6px;">Is there a free trial for Pro?</div>
+          <div style="font-size:0.88rem; color:var(--text-muted);">The Free plan is your trial. Upgrade when you're ready to go unlimited.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/main.js"></script>
+  <script>
+    const user = CraftivioAI.getCurrentUser();
+    if (!user) window.location.href = 'login.html';
+
+    document.getElementById('sidebarAvatar').textContent = user.initials || user.name[0].toUpperCase();
+    document.getElementById('sidebarName').textContent = user.name;
+    document.getElementById('sidebarPlan').textContent = user.plan === 'pro' ? 'Pro Plan ⭐' : 'Free Plan';
+
+    if (user.plan === 'pro') {
+      document.getElementById('proBtn').textContent = '✓ Already Pro!';
+      document.getElementById('proBtn').disabled = true;
+      document.getElementById('proBtn').style.background = 'rgba(16,185,129,0.15)';
+      document.getElementById('proBtn').style.color = '#10b981';
+      document.getElementById('proBtn').style.boxShadow = 'none';
+    }
+
+    function upgradeToPro() {
+      // In production, this would open a Stripe Checkout session
+      // For demo, we simulate the upgrade
+      const btn = document.getElementById('proBtn');
+      btn.textContent = 'Processing...';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        const users = CraftivioAI.getUsers();
+        user.plan = 'pro';
+        users[user.email] = user;
+        CraftivioAI.saveUsers(users);
+        CraftivioAI.setCurrentUser(user);
+
+        btn.textContent = '✓ Welcome to Pro!';
+        btn.style.background = 'rgba(16,185,129,0.15)';
+        btn.style.color = '#10b981';
+        btn.style.boxShadow = 'none';
+        document.getElementById('sidebarPlan').textContent = 'Pro Plan ⭐';
+
+        CraftivioAI.showToast('🎉 Upgraded to Pro! Enjoy unlimited generations.', 'success');
+
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+      }, 1500);
+    }
+
+    function stayFree() {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>
